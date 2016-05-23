@@ -1,4 +1,10 @@
-# Concept
+# *mesme*
+
+## What is *mesme*?
+
+*mesme* is a tool for time tracking. It is designed to log the time that is spent on tasks.
+
+## Concept
 
 ### Users
 
