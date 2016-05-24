@@ -21,6 +21,10 @@ The user can select a task and start tracking time for that task.
 
 An item can have different states: *Backlog* / *In progress* / *Done*
 
+There is a special task *General work*. This task does not have a state and can always be selected. It is not visible in
+the table view. After the *General work* task was selected, the user can enter a description. Once the tracking for that
+task stops, the time is logged with the entered description.
+
 ### Table view (unfinished tasks)
 
 In the table view all unfinished tasks are listed as items. The item shows the state of the task and how much time is
