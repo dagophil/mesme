@@ -3,8 +3,8 @@ import sys
 
 from PyQt5.QtWidgets import QApplication, QStackedLayout, QWidget
 
-from ui.login_screen import LoginScreen
-from ui.track_screen import TrackScreen
+from core.login_screen import LoginScreen
+from core.track_screen import TrackScreen
 
 
 app = None  # the global QApplication object
@@ -12,7 +12,7 @@ app = None  # the global QApplication object
 
 class MesmeMainWindow(QWidget):
     """
-    The main window of mesme.
+    The main window of mesme. It controls the transitions between screens.
     """
 
     def __init__(self, *args, **kwargs):
@@ -23,29 +23,24 @@ class MesmeMainWindow(QWidget):
         self.layout = QStackedLayout()
         self.setLayout(self.layout)
 
-        # Create the screens.
-        self.screens = {
-            "login_screen": LoginScreen(parent=self),
-            "track_screen": TrackScreen(parent=self)
-        }
+        # Create the login screen.
+        self.login_screen = LoginScreen()
+        self.login_screen.onLoginSuccessful.connect(self.onLogin)
+        self.layout.addWidget(self.login_screen)
 
-        # Add the screens to the layout and connect the screen switch signal.
-        for screen in self.screens.values():
-            screen.onSwitchScreen.connect(self.onSwitchScreen)
-            self.layout.addWidget(screen)
+        # Create the track screen.
+        self.track_screen = TrackScreen()
+        self.layout.addWidget(self.track_screen)
 
-        # Start with the login screen.
-        self.onSwitchScreen("login_screen")
+        # Activate the login screen.
+        self.layout.setCurrentWidget(self.login_screen)
 
-    def onSwitchScreen(self, name):
+    def onLogin(self):
         """
-        Switch to the screen with the given name.
-        :param name: screen name
+        Switch to the track screen.
         """
-        if name not in self.screens:
-            logging.warning("Tried to open non-existing screen: " + name)
-        else:
-            self.layout.setCurrentWidget(self.screens[name])
+        self.track_screen.user = self.login_screen.user
+        self.layout.setCurrentWidget(self.track_screen)
 
 
 def main():
@@ -53,8 +48,6 @@ def main():
     Create and show the mesme main window.
     :return: return code of the QApplication.
     """
-    global app
-
     # Initialize the logger.
     formatter = logging.Formatter("%(asctime)s %(levelname)s %(message)s")
     handler = logging.StreamHandler()
@@ -63,6 +56,7 @@ def main():
     logging.root.setLevel(logging.DEBUG)
 
     # Open the main window.
+    global app
     app = QApplication(sys.argv)
     main_window = MesmeMainWindow()
     main_window.show()
