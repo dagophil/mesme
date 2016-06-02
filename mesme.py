@@ -7,6 +7,9 @@ from ui.login_screen import LoginScreen
 from ui.track_screen import TrackScreen
 
 
+app = None  # the global QApplication object
+
+
 class MesmeMainWindow(QWidget):
     """
     The main window of mesme.
@@ -50,6 +53,8 @@ def main():
     Create and show the mesme main window.
     :return: return code of the QApplication.
     """
+    global app
+
     # Initialize the logger.
     formatter = logging.Formatter("%(asctime)s %(levelname)s %(message)s")
     handler = logging.StreamHandler()
