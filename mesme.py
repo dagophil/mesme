@@ -16,16 +16,20 @@ class MesmeMainWindow(QWidget):
     """
 
     def __init__(self, *args, **kwargs):
+        """
+        Create the screens.
+        """
         super(MesmeMainWindow, self).__init__(*args, **kwargs)
 
         # Create the main window layout.
         self.setMinimumSize(800, 600)
+        self.setWindowTitle("mesme")
         self.layout = QStackedLayout()
         self.setLayout(self.layout)
 
         # Create the login screen.
         self.login_screen = LoginScreen()
-        self.login_screen.onLoginSuccessful.connect(self.onLogin)
+        self.login_screen.onLoginSuccessful.connect(self.on_login)
         self.layout.addWidget(self.login_screen)
 
         # Create the track screen.
@@ -35,7 +39,7 @@ class MesmeMainWindow(QWidget):
         # Activate the login screen.
         self.layout.setCurrentWidget(self.login_screen)
 
-    def onLogin(self):
+    def on_login(self):
         """
         Switch to the track screen.
         """

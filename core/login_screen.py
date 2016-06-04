@@ -1,9 +1,10 @@
 import logging
 import os
 
-from PyQt5.QtWidgets import QWidget, QComboBox, QPushButton, QVBoxLayout, QLabel
 from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtWidgets import QWidget, QComboBox, QPushButton, QVBoxLayout, QLabel
 
+from .create_user_dialog import CreateUserDialog
 from .user_profile import UserProfileCollection, UserProfile
 
 
@@ -15,6 +16,9 @@ class LoginScreen(QWidget):
     onLoginSuccessful = pyqtSignal(name="onLogin")
 
     def __init__(self, *args, **kwargs):
+        """
+        Load the user profiles and create the login controls.
+        """
         super(LoginScreen, self).__init__(*args, **kwargs)
 
         self.user = None
@@ -43,7 +47,7 @@ class LoginScreen(QWidget):
         txt = QLabel(text="<a href='#'>Create new user</a>")
         layout.addWidget(txt)
         txt.setContextMenuPolicy(Qt.PreventContextMenu)
-        txt.linkActivated.connect(self.on_create_new_user)
+        txt.linkActivated.connect(self.on_show_create_user_dialog)
 
     def _load_profile_collection(self):
         """
@@ -67,8 +71,17 @@ class LoginScreen(QWidget):
         else:
             logging.debug("TODO: Show message that something has to be selected.")
 
-    def on_create_new_user(self):
+    def on_show_create_user_dialog(self):
         """
         Show the dialog to create a new user.
         """
-        logging.debug("TODO: Show create-user dialog.")
+        w = CreateUserDialog(self.user_profile_collection.names(), parent=self)
+        w.accepted.connect(self.on_create_user)
+        w.show()
+
+    def on_create_user(self, data):
+        """
+
+        :return:
+        """
+        logging.debug("TODO: Create the user. Data: " + str(data))

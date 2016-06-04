@@ -1,7 +1,8 @@
-import appdirs
 import json
-import os
 import logging
+import os
+
+import appdirs
 
 
 class UserProfile(object):
@@ -135,6 +136,13 @@ class UserProfileCollection(object):
         :return:
         """
         return self.user_profiles.items()
+
+    def names(self):
+        """
+        Return a list of the existing user names.
+        :return: Returns a list of the existing user names.
+        """
+        return list(self.user_profiles.keys())
 
     def to_json(self):
         """
