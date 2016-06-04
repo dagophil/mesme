@@ -22,13 +22,23 @@ class UserProfile(object):
             profile[key] = value
         return profile
 
+    @staticmethod
+    def from_dict(d):
+        """
+        Create a user profile from the given dict.
+        :param d: The dict.
+        :return: Returns the user profile.
+        """
+        profile = UserProfile()
+        for key, value in d:
+            profile[key] = value
+        return profile
+
     def __init__(self):
         """
         Create a user profile with uninitialized fields.
         """
         self.settings = {
-            "name": "",
-            "display_name": "",
             "database_location": ""
         }
 
@@ -50,6 +60,13 @@ class UserProfile(object):
             self.settings[name] = value
         else:
             raise IndexError
+
+    def __str__(self):
+        """
+        Convert the settings dict to a string.
+        :return: Returns the string representation of the settings dict.
+        """
+        return str(self.settings)
 
 
 class UserProfileCollection(object):
@@ -78,8 +95,9 @@ class UserProfileCollection(object):
         with open(filename, "r") as f:
             json_dict = json.load(f)
             assert isinstance(json_dict, dict)
-            for name, json_str in json_dict.items():
-                profiles[name] = UserProfile.from_json(json_dict[name])
+            if "users" in json_dict:
+                for name, profile in json_dict["users"].items():
+                    profiles[name] = UserProfile.from_dict(profile)
         return profiles
 
     def __init__(self):

@@ -34,7 +34,7 @@ class LoginScreen(QWidget):
         self.select_user_combobox.addItem("")
         for name, profile in self.user_profile_collection.items():
             assert isinstance(profile, UserProfile)
-            self.select_user_combobox.addItem(profile["display_name"], name)
+            self.select_user_combobox.addItem(name)
 
         btn = QPushButton(text="Login")
         layout.addWidget(btn)
@@ -62,7 +62,8 @@ class LoginScreen(QWidget):
         If something is selected in the select-user combobox, the onLoginSuccessful is emitted.
         """
         if self.select_user_combobox.currentIndex() != 0:
-            logging.debug("TODO: Do login for user " + self.select_user_combobox.currentData())
+            name = self.select_user_combobox.currentText()
+            logging.debug("TODO: Do login for user " + name)
         else:
             logging.debug("TODO: Show message that something has to be selected.")
 
