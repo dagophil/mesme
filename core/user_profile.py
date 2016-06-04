@@ -1,27 +1,10 @@
-import json
 import logging
-import os
-
-import appdirs
 
 
 class UserProfile(object):
     """
     The UserProfile class stores user specific data, for example the location of the database file.
     """
-
-    @staticmethod
-    def from_json(json_str):
-        """
-        Create a user profile from the given json string.
-        :param json_str: The json string.
-        :return: Returns the user profile.
-        """
-        profile = UserProfile()
-        json_dict = json.loads(json_str)
-        for key, value in json_dict.items():
-            profile[key] = value
-        return profile
 
     @staticmethod
     def from_dict(d):
@@ -31,7 +14,7 @@ class UserProfile(object):
         :return: Returns the user profile.
         """
         profile = UserProfile()
-        for key, value in d:
+        for key, value in d.items():
             profile[key] = value
         return profile
 
@@ -60,7 +43,7 @@ class UserProfile(object):
         if name in self.settings:
             self.settings[name] = value
         else:
-            raise IndexError
+            raise IndexError("Invalid setting name: " + name)
 
     def __str__(self):
         """
@@ -69,6 +52,13 @@ class UserProfile(object):
         """
         return str(self.settings)
 
+    def to_dict(self):
+        """
+        Convert the user profile to a dict.
+        :return: The profile dict.
+        """
+        return self.settings
+
 
 class UserProfileCollection(object):
     """
@@ -76,29 +66,21 @@ class UserProfileCollection(object):
     """
 
     @staticmethod
-    def default_location():
+    def from_dict(d):
         """
-        Return the filename of the default profile collection file.
-        :return: Returns the filename of the default profile collection file.
+        Create a UserProfileCollection from the given dict.
+        :param d: The dict.
+        :return: Returns the created UserProfileCollection.
         """
-        dirs = appdirs.AppDirs("mesme", version="0.0.1")
-        filename = os.path.join(dirs.user_config_dir, "config.json")
-        return filename
-
-    @staticmethod
-    def from_file(filename):
-        """
-        Load a UserProfileCollection from the given file.
-        :param filename: The filename.
-        :return: Returns the loaded UserProfileCollection.
-        """
+        assert isinstance(d, dict)
         profiles = UserProfileCollection()
-        with open(filename, "r") as f:
-            json_dict = json.load(f)
-            assert isinstance(json_dict, dict)
-            if "users" in json_dict:
-                for name, profile in json_dict["users"].items():
-                    profiles[name] = UserProfile.from_dict(profile)
+        for name, value in d.items():
+            if isinstance(value, UserProfile):
+                profiles[name] = value
+            elif isinstance(value, dict):
+                profiles[name] = UserProfile.from_dict(value)
+            else:
+                raise TypeError("Value has invalid type: " + value.__class__.__name__)
         return profiles
 
     def __init__(self):
@@ -121,7 +103,10 @@ class UserProfileCollection(object):
         :param key: The profile name.
         :param value: The user profile.
         """
-        self.user_profiles[key] = value
+        if isinstance(value, UserProfile):
+            self.user_profiles[key] = value
+        else:
+            raise TypeError("The UserProfileCollection can only store UserProfile objects.")
 
     def __delitem__(self, key):
         """
@@ -129,6 +114,13 @@ class UserProfileCollection(object):
         :param key: The profile name.
         """
         del self.user_profiles[key]
+
+    def to_dict(self):
+        """
+        Convert the profile collection to a dict.
+        :return: The profile collection dict.
+        """
+        return self.user_profiles
 
     def items(self):
         """
@@ -144,25 +136,9 @@ class UserProfileCollection(object):
         """
         return list(self.user_profiles.keys())
 
-    def to_json(self):
+    def db_locations(self):
         """
-        Convert the profile collection to a json string.
-        :return: Returns the profile collection as a json string.
+        Return a list of the existing database locations.
+        :return: Returns a list of the existing database locations.
         """
-        d = {name: profile.to_json() for name, profile in self.user_profiles.items()}
-        return json.dumps(d)
-
-    def save(self, filename):
-        """
-        Save the profile collection to the given file. If the file already exists it will be overwritten.
-        :param filename: The filename.
-        """
-        # Create the folder structure if necessary.
-        folder = os.path.dirname(filename)
-        if not os.path.isdir(folder):
-            os.makedirs(folder)
-
-        # Create the file.
-        json_str = self.to_json()
-        with open(filename, "w") as f:
-            f.write(json_str)
+        return [profile["database_location"] for profile in self.user_profiles.values()]
