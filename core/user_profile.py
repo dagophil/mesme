@@ -23,7 +23,8 @@ class UserProfile(object):
         Create a user profile with uninitialized fields.
         """
         self.settings = {
-            "database_location": ""
+            "database_location": "",
+            "worktime": {}
         }
 
     def __getitem__(self, name):
@@ -43,7 +44,7 @@ class UserProfile(object):
         if name in self.settings:
             self.settings[name] = value
         else:
-            raise IndexError("Invalid setting name: " + name)
+            raise IndexError("Invalid profile setting: " + name)
 
     def __str__(self):
         """

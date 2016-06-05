@@ -2,9 +2,9 @@ import logging
 import os
 import string
 
-from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot
+from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot, QTime
 from PyQt5.QtGui import QCloseEvent
-from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QFormLayout, QLineEdit, QMessageBox, QLabel
+from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QFormLayout, QLineEdit, QMessageBox, QLabel, QTimeEdit, QToolTip
 
 from .common import global_settings, log_exceptions
 
@@ -47,7 +47,19 @@ class CreateUserDialog(QDialog):
 
         # Add the database filename input.
         self.input_db_lbl = QLabel(text=self._get_input_db_filename(""))
+        self.input_db_lbl.setCursor(Qt.WhatsThisCursor)
+        self.input_db_lbl.setToolTip("All databases are stored in " + global_settings.database_dir)
         layout.addRow("Database filename:", self.input_db_lbl)
+
+        # Add the work time inputs.
+        time_layout = QFormLayout()
+        self.input_work = {}
+        for workday in ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]:
+            self.input_work[workday] = QTimeEdit()
+            if workday not in ["Sa", "Su"]:
+                self.input_work[workday].setTime(QTime(8, 0))
+            time_layout.addRow(workday + ":", self.input_work[workday])
+        layout.addRow("Work time:", time_layout)
 
         # Add the dialog buttons.
         btn_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
@@ -108,6 +120,14 @@ class CreateUserDialog(QDialog):
         """
         Check if the input is valid. If so, set accepted to true and close the dialog.
         """
+        # Write the work time into the data array.
+        worktime = {}
+        for workday, input_widget in self.input_work.items():
+            time = input_widget.time()
+            worktime[workday] = (time.hour(), time.minute())
+        self._data["worktime"] = worktime
+
+        # Check that name and database filename are not in use already.
         name = self._data.get("name", "")
         database_location = self._data.get("database_location", "")
         if len(name) == 0:
