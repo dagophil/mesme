@@ -6,7 +6,7 @@ from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot
 from PyQt5.QtWidgets import QWidget, QComboBox, QPushButton, QVBoxLayout, QLabel
 
 from .create_user_dialog import CreateUserDialog
-from .common import global_settings, log_current_error, log_exceptions
+from .common import global_settings, log_exceptions
 from .user_profile import UserProfileCollection, UserProfile
 
 
@@ -15,15 +15,13 @@ class LoginScreen(QWidget):
     The login screen lets the user select a user profile or create a new one.
     """
 
-    login_successful = pyqtSignal(name="login_successful")
+    login_successful = pyqtSignal(str, UserProfile, name="login_successful")
 
     def __init__(self, *args, **kwargs):
         """
         Load the user profiles and create the login controls.
         """
         super(LoginScreen, self).__init__(*args, **kwargs)
-
-        self.user = None
 
         # Load the user profile collection.
         try:
@@ -46,15 +44,27 @@ class LoginScreen(QWidget):
             self.select_user_combobox.addItem(name)
 
         # Add the login button.
-        btn = QPushButton(text="Login")
-        layout.addWidget(btn)
-        btn.clicked.connect(self.on_login)
+        self.login_btn = QPushButton(text="Login", enabled=False)
+        layout.addWidget(self.login_btn)
 
         # Add the create-user link.
         txt = QLabel(text="<a href='#'>Create new user</a>")
         layout.addWidget(txt)
         txt.setContextMenuPolicy(Qt.PreventContextMenu)
+
+        # Connect signals and slots. This must be done after initializing all class members.
+        self.select_user_combobox.currentIndexChanged.connect(self.on_selection_changed)
+        self.login_btn.clicked.connect(self.on_login)
         txt.linkActivated.connect(self.on_show_create_user_dialog)
+
+    @pyqtSlot(int, name="on_selection_changed")
+    @log_exceptions
+    def on_selection_changed(self, i):
+        """
+        Disable the login button if no username is selected, enable it otherwise.
+        :param i: The current selected index in the selection combobox.
+        """
+        self.login_btn.setEnabled(i != 0)
 
     @pyqtSlot(name="on_login")
     @log_exceptions
@@ -64,9 +74,10 @@ class LoginScreen(QWidget):
         """
         if self.select_user_combobox.currentIndex() != 0:
             name = self.select_user_combobox.currentText()
-            logging.debug("TODO: Do login for user " + name)
+            profile = self.user_profile_collection[name]
+            self.login_successful.emit(name, profile)
         else:
-            logging.debug("TODO: Show message that something has to be selected.")
+            logging.warning("LoginScreen.on_login(): Tried to login without selecting a user.")
 
     @pyqtSlot(name="on_show_create_user_dialog")
     @log_exceptions
@@ -87,7 +98,7 @@ class LoginScreen(QWidget):
         Add the user to the profile collection.
         """
         try:
-            name = data.pop("name")
+            name = data.pop("display_name")
 
             profile = UserProfile()
             for key, value in data.items():

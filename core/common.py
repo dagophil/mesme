@@ -61,6 +61,7 @@ class Settings(object):
         self.dirs = dirs
         self.config_file = os.path.join(self.dirs.user_config_dir, "config.json")
         self.database_dir = os.path.join(self.dirs.user_data_dir, "databases")
+        self.default_database = "mesme.db"
 
     def __setitem__(self, name, value):
         """

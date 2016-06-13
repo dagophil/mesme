@@ -4,6 +4,7 @@ from PyQt5.QtCore import pyqtSlot
 from .login_screen import LoginScreen
 from .track_screen import TrackScreen
 from .common import log_exceptions
+from .user_profile import UserProfile
 
 
 class MainWindow(QWidget):
@@ -24,22 +25,17 @@ class MainWindow(QWidget):
         self.setLayout(self.layout)
 
         # Create the login screen.
-        self.login_screen = LoginScreen()
-        self.login_screen.login_successful.connect(self.on_login)
-        self.layout.addWidget(self.login_screen)
+        login_screen = LoginScreen()
+        login_screen.login_successful.connect(self.on_login)
+        self.layout.addWidget(login_screen)
+        self.layout.setCurrentWidget(login_screen)
 
-        # Create the track screen.
-        self.track_screen = TrackScreen()
-        self.layout.addWidget(self.track_screen)
-
-        # Activate the login screen.
-        self.layout.setCurrentWidget(self.login_screen)
-
-    @pyqtSlot(name="on_login")
+    @pyqtSlot(str, UserProfile, name="on_login")
     @log_exceptions
-    def on_login(self):
+    def on_login(self, user_display_name, user_profile):
         """
         Switch to the track screen.
         """
-        self.track_screen.user = self.login_screen.user
-        self.layout.setCurrentWidget(self.track_screen)
+        track_screen = TrackScreen(user_display_name, user_profile)
+        self.layout.addWidget(track_screen)
+        self.layout.setCurrentWidget(track_screen)

@@ -40,16 +40,9 @@ class CreateUserDialog(QDialog):
         self.setLayout(layout)
 
         # Add the name input.
-        input_name = QLineEdit()
-        input_name.setPlaceholderText("Firstname Lastname")
-        input_name.textChanged.connect(self._on_input_name_changed)
-        layout.addRow("Name:", input_name)
-
-        # Add the database filename input.
-        self.input_db_lbl = QLabel(text=self._get_input_db_filename(""))
-        self.input_db_lbl.setCursor(Qt.WhatsThisCursor)
-        self.input_db_lbl.setToolTip("All databases are stored in " + global_settings.database_dir)
-        layout.addRow("Database filename:", self.input_db_lbl)
+        self.input_name = QLineEdit()
+        self.input_name.setPlaceholderText("Firstname Lastname")
+        layout.addRow("Name:", self.input_name)
 
         # Add the work time inputs.
         time_layout = QFormLayout()
@@ -68,41 +61,13 @@ class CreateUserDialog(QDialog):
         layout.addWidget(btn_box)
 
     @staticmethod
-    def _clean_filename(name):
+    def _user_id(name):
         """
-        Remove invalid characters from the given name, such that it can be used as a filename.
-        The filename may still be invalid, e. g. if it starts with '.' or '..'.
+        Convert the given name to the corresponding user id. Currently the user id equals the name.
         :param name: The name.
-        :return: The filename.
+        :return: Returns the user id..
         """
-        valid_chars = "-_. " + string.ascii_letters + string.digits
-        name = ''.join(c for c in name if c in valid_chars).strip().lower().replace(" ", "_")
         return name
-
-    def _get_input_db_filename(self, name):
-        """
-        Convert the given name to the database filename.
-        :return: The database filename.
-        """
-        name = self._clean_filename(name)
-        if len(name) == 0:
-            name = "mesme_firstname_lastname.db"
-        else:
-            name = "mesme_" + name + ".db"
-        return name
-
-    @pyqtSlot(str, name="_on_input_name_changed")
-    @log_exceptions
-    def _on_input_name_changed(self, name):
-        """
-        Update the database filename if no custom database name was chosen.
-        :param name: The user name.
-        """
-        self._data["name"] = name
-        db_filename = self._get_input_db_filename(name)
-        self.input_db_lbl.setText(db_filename)
-        full_filename = os.path.join(global_settings.database_dir, db_filename)
-        self._data["database_location"] = full_filename
 
     def _show_error(self, text, title="Error"):
         """
@@ -120,7 +85,11 @@ class CreateUserDialog(QDialog):
         """
         Check if the input is valid. If so, set accepted to true and close the dialog.
         """
-        # Write the work time into the data array.
+        # Fill the data dict with the user input.
+        name = self.input_name.text()
+        self._data["display_name"] = name
+        self._data["database_user_id"] = self._user_id(name)
+        self._data["database_location"] = os.path.join(global_settings.database_dir, global_settings.default_database)
         worktime = {}
         for workday, input_widget in self.input_work.items():
             time = input_widget.time()
@@ -128,14 +97,10 @@ class CreateUserDialog(QDialog):
         self._data["worktime"] = worktime
 
         # Check that name and database filename are not in use already.
-        name = self._data.get("name", "")
-        database_location = self._data.get("database_location", "")
         if len(name) == 0:
             self._show_error("Name must not be empty.")
         elif name in self.existing_names:
             self._show_error("The chosen name already exists.")
-        elif database_location in self.existing_dbs:
-            self._show_error("The chosen database already exists.")
         else:
             self._accepted = True
             self.close()
