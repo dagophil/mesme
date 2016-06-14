@@ -24,8 +24,7 @@ class UserProfile(object):
         """
         self.settings = {
             "database_user_id": "",
-            "database_location": "",
-            "worktime": {}
+            "database_location": ""
         }
 
     def __getitem__(self, name):

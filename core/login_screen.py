@@ -88,6 +88,7 @@ class LoginScreen(QWidget):
         names = self.user_profile_collection.names()
         db_locations = self.user_profile_collection.db_locations()
         w = CreateUserDialog(names, db_locations, parent=self)
+        w.setAttribute(Qt.WA_DeleteOnClose, True)
         w.accepted.connect(self.on_create_user)
         w.show()
 

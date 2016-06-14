@@ -1,10 +1,9 @@
 import logging
 import os
-import string
 
-from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot, QTime
+from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot
 from PyQt5.QtGui import QCloseEvent
-from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QFormLayout, QLineEdit, QMessageBox, QLabel, QTimeEdit, QToolTip
+from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QFormLayout, QLineEdit, QMessageBox
 
 from .common import global_settings, log_exceptions
 
@@ -44,16 +43,6 @@ class CreateUserDialog(QDialog):
         self.input_name.setPlaceholderText("Firstname Lastname")
         layout.addRow("Name:", self.input_name)
 
-        # Add the work time inputs.
-        time_layout = QFormLayout()
-        self.input_work = {}
-        for workday in ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]:
-            self.input_work[workday] = QTimeEdit()
-            if workday not in ["Sa", "Su"]:
-                self.input_work[workday].setTime(QTime(8, 0))
-            time_layout.addRow(workday + ":", self.input_work[workday])
-        layout.addRow("Work time:", time_layout)
-
         # Add the dialog buttons.
         btn_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         btn_box.accepted.connect(self._on_accepted)
@@ -90,11 +79,6 @@ class CreateUserDialog(QDialog):
         self._data["display_name"] = name
         self._data["database_user_id"] = self._user_id(name)
         self._data["database_location"] = os.path.join(global_settings.database_dir, global_settings.default_database)
-        worktime = {}
-        for workday, input_widget in self.input_work.items():
-            time = input_widget.time()
-            worktime[workday] = (time.hour(), time.minute())
-        self._data["worktime"] = worktime
 
         # Check that name and database filename are not in use already.
         if len(name) == 0:
