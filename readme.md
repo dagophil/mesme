@@ -43,3 +43,10 @@ There user can be in different (global) states: *At work* / *Pause* / *At home*
 When the user starts tracking time, the global state switches to *At work*. When the user presses the pause button, the
 global state switches to *Pause* and the time tracking for tasks stops. Instead, the pause time is tracked. When the
 user presses the work-done button, the global state switches to *At home* and no time is tracked at all.
+
+## Unit tests
+
+To run the unit tests, execute the following command from the *mesme* source directory.
+```
+python -m unittest test
+```
