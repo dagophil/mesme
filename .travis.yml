@@ -4,5 +4,4 @@ python:
   - "3.5"
 
 script:
-  - python -m unittest test
-
+  - python -m unittest -v test
