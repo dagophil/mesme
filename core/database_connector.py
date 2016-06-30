@@ -115,6 +115,7 @@ class DatabaseConnector(object):
         c = self._connection.cursor()
         c.execute("INSERT INTO Settings (`user_uid`, `timestamp_create`, `key`, `value`) VALUES (?, ?, ?, ?);",
                   (user_uid, timestamp, key, s))
+        self._connection.commit()
 
     def get_setting(self, user_uid, key, default=None):
         """
@@ -130,7 +131,7 @@ class DatabaseConnector(object):
         assert isinstance(key, str)
         c = self._connection.cursor()
         c.execute("SELECT `timestamp_create`, `value` FROM Settings WHERE `user_uid`=? AND `key`=? "
-                  "ORDER BY `timestamp_create` DESC;", (user_uid, key))
+                  "ORDER BY `timestamp_create` DESC, `uid` DESC;", (user_uid, key))
         row = c.fetchone()
         value = default
         if row is not None:
