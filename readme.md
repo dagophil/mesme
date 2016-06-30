@@ -1,6 +1,6 @@
-[![Travis CI Status](https://travis-ci.org/dagophil/mesme.svg?branch=master)](https://travis-ci.org/dagophil/mesme)
-
 # *mesme*
+
+[![Travis CI Status](https://travis-ci.org/dagophil/mesme.svg?branch=master)](https://travis-ci.org/dagophil/mesme)
 
 ## What is *mesme*?
 
