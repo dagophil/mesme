@@ -21,7 +21,7 @@ class LoginScreen(QWidget):
         """
         Load the user profiles and create the login controls.
         """
-        super(LoginScreen, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         # Load the user profile collection.
         try:

@@ -16,7 +16,7 @@ class MainWindow(QWidget):
         """
         Create the screens.
         """
-        super(MainWindow, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         # Create the main window layout.
         self.setMinimumSize(800, 600)

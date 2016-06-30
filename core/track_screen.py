@@ -6,7 +6,7 @@ from .user_profile import UserProfile
 class TrackScreen(QWidget):
 
     def __init__(self, user_display_name, user_profile, *args, **kwargs):
-        super(TrackScreen, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         assert isinstance(user_profile, UserProfile)
 

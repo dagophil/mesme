@@ -8,7 +8,7 @@ class WeekTimeEdit(QFormLayout):
     """
 
     def __init__(self, *args, **kwargs):
-        super(WeekTimeEdit, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self._days = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
         times = 5*[QTime(8, 0)] + 2*[QTime(0, 0)]

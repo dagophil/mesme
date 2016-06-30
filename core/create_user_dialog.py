@@ -22,7 +22,7 @@ class CreateUserDialog(QDialog):
         :param existing_names: List with the existing user names.
         :param existing_dbs: List with the existing database filenames.
         """
-        super(CreateUserDialog, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self.existing_names = existing_names
         self.existing_dbs = existing_dbs
