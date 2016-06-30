@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/dagophil/mesme.svg?branch=master)](https://travis-ci.org/dagophil/mesme)
+Travis: [![Build Status](https://travis-ci.org/dagophil/mesme.svg?branch=master)](https://travis-ci.org/dagophil/mesme)
 
 # *mesme*
 
