@@ -4,6 +4,7 @@ import json
 import sqlite3
 
 from .database_types import User, Setting, Task, TrackEntry
+from .database_types import create_table, insert_object, update_object
 
 
 class DatabaseConnector(object):
@@ -20,33 +21,14 @@ class DatabaseConnector(object):
         self._date_format = "%Y-%m-%dT%H:%M:%S:%f"
         self._connection = sqlite3.connect(database_location)
         c = self._connection.cursor()
-        c.execute("CREATE TABLE IF NOT EXISTS `Users` ("
-                  "`uid` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, "
-                  "`name` TEXT NOT NULL);")
-        c.execute("CREATE TABLE IF NOT EXISTS `Settings` ("
-                  "`uid` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, "
-                  "`user_uid` INTEGER NOT NULL, "
-                  "`timestamp_create` TEXT NOT NULL, "
-                  "`key` TEXT NOT NULL, "
-                  "`value` TEXT NOT NULL);")
-        c.execute("CREATE TABLE IF NOT EXISTS `Tasks` ("
-                  "`uid` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, "
-                  "`user_uid` INTEGER NOT NULL, "
-                  "`title` TEXT, "
-                  "`description` TEXT, "
-                  "`timestamp_create` TEXT NOT NULL, "
-                  "`datetime_done` TEXT, "
-                  "`timestamp_orderby` TEXT NOT NULL, "
-                  "`type` INTEGER NOT NULL);")
-        c.execute("CREATE TABLE IF NOT EXISTS `TrackEntries` ("
-                  "`uid` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, "
-                  "`user_uid` INTEGER NOT NULL, "
-                  "`task_uid` INTEGER, "
-                  "`timestamp_begin` TEXT NOT NULL, "
-                  "`timestamp_end` TEXT NOT NULL, "
-                  "`description` TEXT, "
-                  "`type` INTEGER NOT NULL);")
-        self._connection.commit()
+        tables = {
+            "Users": User,
+            "Settings": Setting,
+            "Tasks": Task,
+            "TrackEntries": TrackEntry
+        }
+        for table_name, object_class in tables.items():
+            create_table(self._connection, table_name, object_class, if_not_exists=True)
 
     def __del__(self):
         """
@@ -83,12 +65,7 @@ class DatabaseConnector(object):
             existing_user = self.get_user(user.name)
             user.uid = existing_user.uid
         except KeyError:
-            user.uid = None
-            c = self._connection.cursor()
-            c.execute("INSERT INTO `Users` VALUES (?, ?);", user.field_values())
-            self._connection.commit()
-            uid = c.lastrowid
-            user.uid = uid
+            insert_object(self._connection, "Users", user)
 
     def get_user(self, name):
         """
@@ -105,6 +82,15 @@ class DatabaseConnector(object):
         else:
             return User(*row)
 
+    def update_user(self, user):
+        """
+        Use all not-None values from the given user and use them to overwrite the respective fields of the user with the
+        given uid.
+        :param user: The user database object.
+        """
+        assert isinstance(user, User)
+        update_object(self._connection, "Users", user, ignore_none=True)
+
     def create_setting(self, setting):
         """
         Inserts the setting into the database and sets setting.uid and setting.timestamp_create.
@@ -112,14 +98,16 @@ class DatabaseConnector(object):
         :param setting: The setting.
         """
         assert isinstance(setting, Setting)
-        setting.uid = None
+
+        # Temporarily overwrite the value with its json string.
         old_value = setting.value
         setting.value = json.dumps(setting.value)
-        setting.timestamp_create = self._get_current_timestamp()
-        c = self._connection.cursor()
-        c.execute("INSERT INTO `Settings` VALUES (?, ?, ?, ?, ?);", setting.field_values())
-        self._connection.commit()
-        setting.uid = c.lastrowid
+
+        # Set the timestamp and insert the setting into the database.
+        setting.timestamp_create = self.get_current_timestamp()
+        insert_object(self._connection, "Settings", setting)
+
+        # Replace the json string with the actual value.
         setting.value = old_value
 
     def get_setting(self, user_uid, key):
@@ -148,13 +136,9 @@ class DatabaseConnector(object):
         :param task: The task.
         """
         assert isinstance(task, Task)
-        task.uid = None
-        task.timestamp_create = self._get_current_timestamp()
+        task.timestamp_create = self.get_current_timestamp()
         task.timestamp_orderby = task.timestamp_create
-        c = self._connection.cursor()
-        c.execute("INSERT INTO `Tasks` VALUES (?, ?, ?, ?, ?, ?, ?, ?);", task.field_values())
-        self._connection.commit()
-        task.uid = c.lastrowid
+        insert_object(self._connection, "Tasks", task)
 
     def get_all_tasks(self, user_uid):
         """
@@ -162,6 +146,12 @@ class DatabaseConnector(object):
         :param user_uid: The user uid.
         :return: List with tasks.
         """
+        assert isinstance(user_uid, int)
+        c = self._connection.cursor()
+        c.execute("SELECT * FROM `Tasks` WHERE `user_uid`=? ORDER BY `timestamp_orderby` ASC, `uid` ASC;", (user_uid,))
+        rows = c.fetchall()
+        tasks = [Task(*row) for row in rows]
+        return tasks
 
     def get_open_tasks(self, user_uid):
         """
@@ -170,16 +160,22 @@ class DatabaseConnector(object):
         :param user_uid: The user uid.
         :return: List with open tasks.
         """
-        raise NotImplementedError()
+        assert isinstance(user_uid, int)
+        c = self._connection.cursor()
+        c.execute("SELECT * FROM `Tasks` WHERE `user_uid`=? AND (`timestamp_done` is null OR `timestamp_done`='') "
+                  "ORDER BY `timestamp_orderby` ASC, `uid` ASC;", (user_uid,))
+        rows = c.fetchall()
+        tasks = [Task(*row) for row in rows]
+        return tasks
 
-    def update_task(self, task_uid, task):
+    def update_task(self, task):
         """
         Use all not-None values from the given task and use them to overwrite the respective fields of the task with the
         given uid.
-        :param task_uid: The task uid of the task that is updated.
         :param task: The task with the update values.
         """
-        raise NotImplementedError()
+        assert isinstance(task, Task)
+        update_object(self._connection, "Tasks", task, ignore_none=True)
 
     def create_track_entry(self, entry):
         """
@@ -196,7 +192,7 @@ class DatabaseConnector(object):
         """
         raise NotImplementedError()
 
-    def _get_current_timestamp(self):
+    def get_current_timestamp(self):
         """
         Returns a well-formatted current timestamp.
         :return: The timestamp.
