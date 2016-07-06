@@ -242,31 +242,28 @@ class TrackEntry(DatabaseObject):
 
     _field_types = OrderedDict([
         ("uid", "INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT"),
-        ("user_uid", "INTEGER NOT NULL"),
-        ("task_uid", "INTEGER"),
+        ("task_uid", "INTEGER NOT NULL"),
         ("timestamp_begin", "TEXT NOT NULL"),
         ("timestamp_end", "TEXT NOT NULL"),
         ("description", "TEXT"),
         ("type_id", "INTEGER NOT NULL")
     ])
 
-    def __init__(self, uid=None, user_uid=None, task_uid=None, datetime_begin=None, datetime_end=None, description=None,
+    def __init__(self, uid=None, task_uid=None, timestamp_begin=None, timestamp_end=None, description=None,
                  type_id=None):
         """
         Initialize the track entry object.
         :param uid: The uid.
-        :param user_uid: The user uid.
         :param task_uid: The task uid.
-        :param datetime_begin: Timestamp of the beginning of the time tracking.
-        :param datetime_end: Timestamp of the end of the time tracking.
+        :param timestamp_begin: Timestamp of the beginning of the time tracking.
+        :param timestamp_end: Timestamp of the end of the time tracking.
         :param description: The description.
         :param type_id: The type id.
         """
         super().__init__()
         self.uid = uid
-        self.user_uid = user_uid
         self.task_uid = task_uid
-        self.datetime_begin = datetime_begin
-        self.datetime_end = datetime_end
+        self.timestamp_begin = timestamp_begin
+        self.timestamp_end = timestamp_end
         self.description = description
         self.type_id = type_id

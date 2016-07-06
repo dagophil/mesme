@@ -2,7 +2,7 @@ import os
 import unittest
 
 from core.database_connector import DatabaseConnector
-from core.database_types import User, Setting, Task
+from core.database_types import User, Setting, Task, TrackEntry
 
 
 DB_PATH = "test.db"
@@ -182,6 +182,41 @@ class TestDatabase(unittest.TestCase):
         task = tasks[0]
         self.assertEqual(task.uid, uid)
         self.assertEqual(task.title, "New title")
+
+    def test_create_track_entry(self):
+        """
+        Create track entries and make sure that the uids differ.
+        """
+        task = Task(user_uid=1, type_id=0)
+        db.create_task(task)
+        now = db.get_current_timestamp()
+        entry0 = TrackEntry(task_uid=task.uid, timestamp_begin=now, timestamp_end=now, type_id=0)
+        entry1 = TrackEntry(task_uid=task.uid, timestamp_begin=now, timestamp_end=now, type_id=0)
+        for entry in (entry0, entry1):
+            db.create_track_entry(entry)
+        for entry in (entry0, entry1):
+            self.assertGreater(entry.uid, 0)
+
+    def test_get_track_entries_for_task(self):
+        """
+        Create track entries for different tasks and make sure that get_all_tasks() only returns the entries for the
+        given task.
+        """
+        task0 = Task(user_uid=2, type_id=0)
+        task1 = Task(user_uid=2, type_id=0)
+        db.create_task(task0)
+        db.create_task(task1)
+        now = db.get_current_timestamp()
+        entries0 = [TrackEntry(task_uid=task0.uid, timestamp_begin=now, timestamp_end=now, type_id=0) for _ in range(3)]
+        entries1 = [TrackEntry(task_uid=task1.uid, timestamp_begin=now, timestamp_end=now, type_id=0) for _ in range(5)]
+        for entry in entries0 + entries1:
+            db.create_track_entry(entry)
+        entries2 = db.get_track_entries_for_task(task0.uid)
+        entries3 = db.get_track_entries_for_task(task1.uid)
+        self.assertEqual(entries0, entries2)
+        self.assertNotEqual(entries0, entries3)
+        self.assertNotEqual(entries1, entries2)
+        self.assertEqual(entries1, entries3)
 
 
 if __name__ == "__main__":

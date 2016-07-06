@@ -20,7 +20,6 @@ class DatabaseConnector(object):
         """
         self._date_format = "%Y-%m-%dT%H:%M:%S:%f"
         self._connection = sqlite3.connect(database_location)
-        c = self._connection.cursor()
         tables = {
             "Users": User,
             "Settings": Setting,
@@ -182,7 +181,8 @@ class DatabaseConnector(object):
         Inserts a new track entry into the database and sets entry.uid.
         :param entry: The track entry.
         """
-        raise NotImplementedError()
+        assert isinstance(entry, TrackEntry)
+        insert_object(self._connection, "TrackEntries", entry)
 
     def get_track_entries_for_task(self, task_uid):
         """
@@ -190,7 +190,12 @@ class DatabaseConnector(object):
         :param task_uid: The task uid.
         :return: List with the track entries.
         """
-        raise NotImplementedError()
+        assert isinstance(task_uid, int)
+        c = self._connection.cursor()
+        c.execute("SELECT * FROM `TrackEntries` WHERE `task_uid`=? ORDER BY `timestamp_begin` ASC;", (task_uid,))
+        rows = c.fetchall()
+        entries = [TrackEntry(*row) for row in rows]
+        return entries
 
     def get_current_timestamp(self):
         """
