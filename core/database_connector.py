@@ -20,7 +20,7 @@ class DatabaseConnector(object):
         :param database_location: Path to the database.
         """
         self._date_format = "%Y-%m-%dT%H:%M:%S:%f"
-        self._create_database_folder_structure(database_location)
+        DatabaseConnector._create_database_folder_structure(database_location)
         self._connection = sqlite3.connect(database_location)
         tables = {
             "Users": User,
@@ -52,6 +52,7 @@ class DatabaseConnector(object):
         Create the database folder structure.
         :param database_location: Path to the database.
         """
+        database_location = os.path.abspath(database_location)
         folder = os.path.dirname(database_location)
         os.makedirs(folder, exist_ok=True)
 
