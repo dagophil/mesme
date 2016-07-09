@@ -5,7 +5,7 @@ import os
 import sqlite3
 
 from .database_types import User, Setting, Task, TrackEntry
-from .database_types import create_table, insert_object, update_object
+from .database_types import create_table, insert_object, update_object, delete_object
 
 
 class DatabaseConnector(object):
@@ -158,7 +158,8 @@ class DatabaseConnector(object):
         """
         assert isinstance(user_uid, int)
         c = self._connection.cursor()
-        c.execute("SELECT * FROM `Tasks` WHERE `user_uid`=? ORDER BY `timestamp_orderby` ASC, `uid` ASC;", (user_uid,))
+        c.execute("SELECT * FROM `Tasks` WHERE `user_uid`=? AND `deleted`!=1 "
+                  "ORDER BY `timestamp_orderby` ASC, `uid` ASC;", (user_uid,))
         rows = c.fetchall()
         tasks = [Task(*row) for row in rows]
         return tasks
@@ -172,7 +173,7 @@ class DatabaseConnector(object):
         """
         assert isinstance(user_uid, int)
         c = self._connection.cursor()
-        c.execute("SELECT * FROM `Tasks` WHERE `user_uid`=? AND (`done`=0) "
+        c.execute("SELECT * FROM `Tasks` WHERE `user_uid`=? AND `done`=0 AND `deleted`!=1 "
                   "ORDER BY `timestamp_orderby` ASC, `uid` ASC;", (user_uid,))
         rows = c.fetchall()
         tasks = [Task(*row) for row in rows]
@@ -186,6 +187,14 @@ class DatabaseConnector(object):
         """
         assert isinstance(task, Task)
         update_object(self._connection, "Tasks", task, ignore_none=True)
+
+    def delete_task(self, task_uid):
+        """
+        Set the deleted attribute of the task to True.
+        :param task_uid: The task uid.
+        """
+        assert isinstance(task_uid, int)
+        delete_object(self._connection, "Tasks", task_uid)
 
     def create_track_entry(self, entry):
         """

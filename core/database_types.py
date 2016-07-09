@@ -70,6 +70,19 @@ def update_object(connection, table_name, database_object, ignore_none=False):
         connection.commit()
 
 
+def delete_object(connection, table_name, object_uid):
+    """
+    Set the deleted attribute of the object with the given uid to True.
+    :param connection: The database connection.
+    :param table_name: The table name.
+    :param object_uid: The uid of the database object.
+    """
+    query = "UPDATE `%s` SET `deleted`=? WHERE `uid`=?;" % table_name
+    c = connection.cursor()
+    c.execute(query, (True, object_uid))
+    connection.commit()
+
+
 class DatabaseObject(object):
     """
     Base class for all database objects.
@@ -151,18 +164,21 @@ class User(DatabaseObject):
 
     _field_types = OrderedDict([
         ("uid", "INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT"),
-        ("name", "TEXT NOT NULL")
+        ("name", "TEXT NOT NULL"),
+        ("deleted", "BOOLEAN NOT NULL")
     ])
 
-    def __init__(self, uid=None, name=None):
+    def __init__(self, uid=None, name=None, deleted=False):
         """
         Initialize the user object.
         :param uid: The uid.
         :param name: The user name.
+        :param deleted: Whether the user is deleted.
         """
         super().__init__()
         self.uid = uid
         self.name = name
+        self.deleted = bool(deleted)
 
 
 class Setting(DatabaseObject):
@@ -207,11 +223,12 @@ class Task(DatabaseObject):
         ("description", "TEXT"),
         ("done", "BOOLEAN NOT NULL"),
         ("timestamp_orderby", "TEXT NOT NULL"),
-        ("type_id", "INTEGER NOT NULL")
+        ("type_id", "INTEGER NOT NULL"),
+        ("deleted", "BOOLEAN NOT NULL")
     ])
 
     def __init__(self, uid=None, user_uid=None, title=None, description=None, done=False, timestamp_orderby=None,
-                 type_id=None):
+                 type_id=None, deleted=False):
         """
         Initialize the task object.
         :param uid: The uid.
@@ -221,6 +238,7 @@ class Task(DatabaseObject):
         :param done: Whether the task is done.
         :param timestamp_orderby: Timestamp that is used for ordering.
         :param type_id: The type id.
+        :param deleted: Whether the task is deleted.
         """
         super().__init__()
         self.uid = uid
@@ -230,6 +248,7 @@ class Task(DatabaseObject):
         self.done = bool(done)
         self.timestamp_orderby = timestamp_orderby
         self.type_id = type_id
+        self.deleted = bool(deleted)
 
 
 class TrackEntry(DatabaseObject):
@@ -243,11 +262,12 @@ class TrackEntry(DatabaseObject):
         ("timestamp_begin", "TEXT NOT NULL"),
         ("timestamp_end", "TEXT NOT NULL"),
         ("description", "TEXT"),
-        ("type_id", "INTEGER NOT NULL")
+        ("type_id", "INTEGER NOT NULL"),
+        ("deleted", "BOOLEAN NOT NULL")
     ])
 
     def __init__(self, uid=None, task_uid=None, timestamp_begin=None, timestamp_end=None, description=None,
-                 type_id=None):
+                 type_id=None, deleted=False):
         """
         Initialize the track entry object.
         :param uid: The uid.
@@ -256,6 +276,7 @@ class TrackEntry(DatabaseObject):
         :param timestamp_end: Timestamp of the end of the time tracking.
         :param description: The description.
         :param type_id: The type id.
+        :param deleted: Whether the track entry is deleted.
         """
         super().__init__()
         self.uid = uid
@@ -264,3 +285,4 @@ class TrackEntry(DatabaseObject):
         self.timestamp_end = timestamp_end
         self.description = description
         self.type_id = type_id
+        self.deleted = bool(deleted)

@@ -3,7 +3,7 @@ import logging
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QFormLayout, QLineEdit, QPlainTextEdit
 
-from .widgets import OkCancelDialog
+from .ok_cancel_dialog import OkCancelDialog
 
 
 class CreateTaskDialog(OkCancelDialog):

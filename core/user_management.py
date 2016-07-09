@@ -1,5 +1,11 @@
+import logging
+
 from .database_connector import DatabaseConnector
-from .database_types import User
+from .database_types import User, Task
+
+
+TASK_WORK = 0
+GENERAL_WORK = 1
 
 
 class UserManagement(object):
@@ -9,3 +15,21 @@ class UserManagement(object):
         self._database = DatabaseConnector(database_location)
         self._database.create_user(self._user)
         self.open_tasks = self._database.get_open_tasks(self._user.uid)
+
+    def create_task(self, title, description):
+        """
+        Create a task with the given title and description. Returns the task uid.
+        :param title: The title.
+        :param description: The description.
+        :return: The task uid.
+        """
+        task = Task(user_uid=self._user.uid, title=title, description=description, type_id=TASK_WORK)
+        self._database.create_task(task)
+        return task.uid
+
+    def delete_task(self, task_uid):
+        """
+        Delete the task with the given uid.
+        :param task_uid: The task uid.
+        """
+        self._database.delete_task(task_uid)

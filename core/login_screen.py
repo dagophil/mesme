@@ -1,13 +1,11 @@
 import logging
-import os
-import sys
 
 from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot
 from PyQt5.QtWidgets import QWidget, QComboBox, QPushButton, QVBoxLayout, QLabel
 
-from .create_user_dialog import CreateUserDialog
 from .common import global_settings, log_exceptions
 from .user_profile import UserProfileCollection, UserProfile
+from .widgets import CreateUserDialog
 
 
 class LoginScreen(QWidget):

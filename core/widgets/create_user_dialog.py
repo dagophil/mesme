@@ -4,8 +4,8 @@ import os
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QFormLayout, QLineEdit
 
-from .common import global_settings
-from .widgets import OkCancelDialog
+from ..common import global_settings
+from .ok_cancel_dialog import OkCancelDialog
 
 
 class CreateUserDialog(OkCancelDialog):
