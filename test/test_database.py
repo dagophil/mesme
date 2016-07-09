@@ -183,6 +183,22 @@ class TestDatabase(unittest.TestCase):
         self.assertEqual(task.uid, uid)
         self.assertEqual(task.title, "New title")
 
+    def test_delete_task(self):
+        """
+        Create and delete a task and make sure that get_open_tasks() and get_all_tasks() do not return the deleted task.
+        """
+        user = User(name="Sebastian")
+        db.create_user(user)
+        tasks = [Task(user_uid=user.uid, type_id=0) for _ in range(5)]
+        for t in tasks:
+            db.create_task(t)
+        db.delete_task(tasks[1].uid)
+        del tasks[1]
+        open_tasks = db.get_open_tasks(user.uid)
+        all_tasks = db.get_all_tasks(user.uid)
+        self.assertEqual(open_tasks, tasks)
+        self.assertEqual(all_tasks, tasks)
+
     def test_create_track_entry(self):
         """
         Create track entries and make sure that the uids differ.

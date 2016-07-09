@@ -22,23 +22,22 @@ class TrackScreen(QWidget):
         db_location = user_profile["database_location"]
         self._user_management = UserManagement(db_user, db_location)
 
-        # Create the widget layout.
-        layout = QVBoxLayout()
-        layout.setAlignment(Qt.AlignCenter)
-        self.setLayout(layout)
-
-        # Add the task box.
+        # Create the task box.
         self._task_list = TaskList(self._user_management)
         self._task_list.load_open_tasks()
 
-        # Add the tracking controls.
+        # Create the tracking controls.
         tracking_controls = TrackingControls(self._user_management)
-        layout.addWidget(tracking_controls)
         tracking_controls.create_task.connect(self._task_list.add_task)
         tracking_controls.general_work.connect(self._on_general_work)
         tracking_controls.pause.connect(self._on_pause)
         tracking_controls.end_of_work.connect(self._on_end_of_work)
 
+        # Create the layout.
+        layout = QVBoxLayout()
+        layout.setAlignment(Qt.AlignCenter)
+        self.setLayout(layout)
+        layout.addWidget(tracking_controls)
         layout.addWidget(self._task_list)
 
     @pyqtSlot(name="_on_general_work")
