@@ -1,6 +1,9 @@
+import logging
+
 from PyQt5.QtWidgets import QWidget, QLabel
 
 from .user_profile import UserProfile
+from .database_connector import DatabaseConnector
 
 
 class TrackScreen(QWidget):
@@ -11,5 +14,7 @@ class TrackScreen(QWidget):
         assert isinstance(user_profile, UserProfile)
 
         self.user_display_name = user_display_name
-        self.user_profile = user_profile
+        self.user_name = user_profile["database_user_name"]
+        self.database = DatabaseConnector(user_profile["database_location"])
+
         self.lbl = QLabel(text="track screen", parent=self)

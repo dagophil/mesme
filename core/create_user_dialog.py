@@ -77,7 +77,7 @@ class CreateUserDialog(QDialog):
         # Fill the data dict with the user input.
         name = self.input_name.text()
         self._data["display_name"] = name
-        self._data["database_user_id"] = self._user_id(name)
+        self._data["database_user_name"] = self._user_id(name)
         self._data["database_location"] = os.path.join(global_settings.database_dir, global_settings.default_database)
 
         # Check that name and database filename are not in use already.

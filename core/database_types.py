@@ -76,8 +76,8 @@ class DatabaseObject(object):
     """
 
     """
-    Ordered dict with the column names and types of the database object. Key is the column name, value is the sql type.
-    Must be set in the subclass.
+    _field_types is an ordered dict with the column names and types of the database object. Key is the column name,
+    value is the sql type. It must be overwritten in the subclass.
     Example:
     _field_types = OrderedDict([
         ("uid", "INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT"),

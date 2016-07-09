@@ -23,7 +23,7 @@ class UserProfile(object):
         Create a user profile with uninitialized fields.
         """
         self.settings = {
-            "database_user_id": "",
+            "database_user_name": "",
             "database_location": ""
         }
 

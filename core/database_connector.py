@@ -1,6 +1,7 @@
 import logging
 import datetime
 import json
+import os
 import sqlite3
 
 from .database_types import User, Setting, Task, TrackEntry
@@ -19,6 +20,7 @@ class DatabaseConnector(object):
         :param database_location: Path to the database.
         """
         self._date_format = "%Y-%m-%dT%H:%M:%S:%f"
+        self._create_database_folder_structure(database_location)
         self._connection = sqlite3.connect(database_location)
         tables = {
             "Users": User,
@@ -43,6 +45,15 @@ class DatabaseConnector(object):
         if self._connection is not None:
             self._connection.close()
             self._connection = None
+
+    @staticmethod
+    def _create_database_folder_structure(database_location):
+        """
+        Create the database folder structure.
+        :param database_location: Path to the database.
+        """
+        folder = os.path.dirname(database_location)
+        os.makedirs(folder, exist_ok=True)
 
     @property
     def date_format(self):
