@@ -4,6 +4,7 @@ from PyQt5.QtCore import Qt, pyqtSlot
 from PyQt5.QtWidgets import QWidget, QLabel, QGroupBox, QVBoxLayout, QPushButton, QSizePolicy
 
 from .common import log_exceptions
+from .create_task_dialog import CreateTaskDialog
 from .user_management import UserManagement
 from .user_profile import UserProfile
 from .widgets import TaskWidget, TrackingControlsWidget
@@ -30,10 +31,10 @@ class TrackScreen(QWidget):
         # Add the tracking controls.
         tracking_controls = TrackingControlsWidget()
         layout.addWidget(tracking_controls)
-        tracking_controls.create_task.connect(self.on_create_task)
-        tracking_controls.general_work.connect(self.on_general_work)
-        tracking_controls.pause.connect(self.on_pause)
-        tracking_controls.end_of_work.connect(self.on_end_of_work)
+        tracking_controls.create_task.connect(self._on_show_create_task_dialog)
+        tracking_controls.general_work.connect(self._on_general_work)
+        tracking_controls.pause.connect(self._on_pause)
+        tracking_controls.end_of_work.connect(self._on_end_of_work)
 
         # Add the task box.
         self._task_box = QVBoxLayout()
@@ -56,65 +57,75 @@ class TrackScreen(QWidget):
             logging.warning("Tried to add a task to the track screen that was already added before.")
         else:
             task = TaskWidget(task_uid, title, description)
-            task.start.connect(self.on_start_task)
-            task.stop.connect(self.on_stop_task)
-            task.done.connect(self.on_task_done)
+            task.start.connect(self._on_start_task)
+            task.stop.connect(self._on_stop_task)
+            task.done.connect(self._on_task_done)
             self._task_box.addWidget(task)
             self._tasks[task_uid] = task
 
-    @pyqtSlot(name="on_create_task")
+    @pyqtSlot(name="_on_show_create_task_dialog")
     @log_exceptions
-    def on_create_task(self):
+    def _on_show_create_task_dialog(self):
         """
         Show the create task dialog.
         """
-        logging.debug("Creating task")
+        w = CreateTaskDialog(parent=self)
+        w.accepted.connect(self._on_create_task)
+        w.show()
 
-    @pyqtSlot(name="on_general_work")
+    @pyqtSlot(tuple, name="_on_create_task")
     @log_exceptions
-    def on_general_work(self):
+    def _on_create_task(self, task_values):
+        """
+        Create the task.
+        """
+        logging.debug("Creating task " + str(task_values))
+
+    @pyqtSlot(name="_on_general_work")
+    @log_exceptions
+    def _on_general_work(self):
         """
         Start general work.
         """
         logging.debug("Starting general work")
 
-    @pyqtSlot(name="on_pause")
+    @pyqtSlot(name="_on_pause")
     @log_exceptions
-    def on_pause(self):
+    def _on_pause(self):
         """
         Start pause.
         """
         logging.debug("Pause")
 
-    @pyqtSlot(name="on_end_of_work")
+    @pyqtSlot(name="_on_end_of_work")
     @log_exceptions
-    def on_end_of_work(self):
+    def _on_end_of_work(self):
         """
         Stop the work for today.
         """
         logging.debug("End of work")
 
-    @pyqtSlot(int, name="on_start_task")
+    @pyqtSlot(int, name="_on_start_task")
     @log_exceptions
-    def on_start_task(self, task_uid):
+    def _on_start_task(self, task_uid):
         """
         Start the time tracking on the task with the given uid.
         :param task_uid: The task uid.
         """
         logging.debug("Start work on task " + str(task_uid))
 
-    @pyqtSlot(int, name="on_stop_task")
+    @pyqtSlot(int, name="_on_stop_task")
     @log_exceptions
-    def on_stop_task(self, task_uid):
+    def _on_stop_task(self, task_uid):
         """
         Stop the time tracking on the task with the given uid.
         :param task_uid: The task uid.
         """
         logging.debug("Stop work on task " + str(task_uid))
 
-    @pyqtSlot(int, name="on_task_done")
+    @pyqtSlot(int, name="_on_task_done")
     @log_exceptions
-    def on_task_done(self, task_uid):
+    def _on_task_done(self, task_uid):
         """
         Set the task with the given uid to done.
         :param task_uid:  The task uid.
