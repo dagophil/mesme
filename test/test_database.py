@@ -153,7 +153,7 @@ class TestDatabase(unittest.TestCase):
         """
         user = User(name="Friedrich")
         db.create_user(user)
-        tasks0 = [Task(user_uid=user.uid, type_id=0, timestamp_done=db.get_current_timestamp()) for _ in range(3)]
+        tasks0 = [Task(user_uid=user.uid, type_id=0, done=True) for _ in range(3)]
         tasks1 = [Task(user_uid=user.uid, type_id=0) for _ in range(5)]
         for t in tasks0 + tasks1:
             db.create_task(t)

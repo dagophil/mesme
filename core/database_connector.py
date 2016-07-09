@@ -135,8 +135,7 @@ class DatabaseConnector(object):
         :param task: The task.
         """
         assert isinstance(task, Task)
-        task.timestamp_create = self.get_current_timestamp()
-        task.timestamp_orderby = task.timestamp_create
+        task.timestamp_orderby = self.get_current_timestamp()
         insert_object(self._connection, "Tasks", task)
 
     def get_all_tasks(self, user_uid):
@@ -161,7 +160,7 @@ class DatabaseConnector(object):
         """
         assert isinstance(user_uid, int)
         c = self._connection.cursor()
-        c.execute("SELECT * FROM `Tasks` WHERE `user_uid`=? AND (`timestamp_done` is null OR `timestamp_done`='') "
+        c.execute("SELECT * FROM `Tasks` WHERE `user_uid`=? AND (`done`=0) "
                   "ORDER BY `timestamp_orderby` ASC, `uid` ASC;", (user_uid,))
         rows = c.fetchall()
         tasks = [Task(*row) for row in rows]

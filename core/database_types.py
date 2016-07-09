@@ -205,22 +205,20 @@ class Task(DatabaseObject):
         ("user_uid", "INTEGER NOT NULL"),
         ("title", "TEXT"),
         ("description", "TEXT"),
-        ("timestamp_create", "TEXT NOT NULL"),
-        ("timestamp_done", "TEXT"),
+        ("done", "BOOLEAN NOT NULL"),
         ("timestamp_orderby", "TEXT NOT NULL"),
         ("type_id", "INTEGER NOT NULL")
     ])
 
-    def __init__(self, uid=None, user_uid=None, title=None, description=None, timestamp_create=None, timestamp_done=None,
-                 timestamp_orderby=None, type_id=None):
+    def __init__(self, uid=None, user_uid=None, title=None, description=None, done=False, timestamp_orderby=None,
+                 type_id=None):
         """
         Initialize the task object.
         :param uid: The uid.
         :param user_uid: The user uid.
         :param title: The title.
         :param description: The description.
-        :param timestamp_create: Timestamp of creation.
-        :param timestamp_done: Timestamp of completion.
+        :param done: Whether the task is done.
         :param timestamp_orderby: Timestamp that is used for ordering.
         :param type_id: The type id.
         """
@@ -229,8 +227,7 @@ class Task(DatabaseObject):
         self.user_uid = user_uid
         self.title = title
         self.description = description
-        self.timestamp_create = timestamp_create
-        self.timestamp_done = timestamp_done
+        self.done = bool(done)
         self.timestamp_orderby = timestamp_orderby
         self.type_id = type_id
 
