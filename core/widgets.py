@@ -1,5 +1,9 @@
-from PyQt5.QtWidgets import QFormLayout, QTimeEdit
-from PyQt5.QtCore import QTime
+import logging
+
+from PyQt5.QtCore import QTime, Qt, pyqtSignal, pyqtSlot
+from PyQt5.QtWidgets import QFormLayout, QTimeEdit, QWidget, QHBoxLayout, QLabel, QPushButton, QSizePolicy, QSpacerItem
+
+from .common import log_exceptions
 
 
 class WeekTimeEdit(QFormLayout):
@@ -38,3 +42,104 @@ class WeekTimeEdit(QFormLayout):
         :return: Returns the {day: time} dict.
         """
         return [(day, self._time_inputs[day].time()) for day in self._days]
+
+
+class TaskWidget(QWidget):
+    """
+    The TaskWidget is a QWidget with two labels and three buttons. It is used to show title and description of a task
+    and provides signals to start and stop the time tracking for that task.
+    """
+
+    start = pyqtSignal(int, name="start")
+    stop = pyqtSignal(int, name="stop")
+    done = pyqtSignal(int, name="done")
+
+    def __init__(self, task_uid, title, description, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._task_uid = task_uid
+
+        # Create the layout.
+        layout = QHBoxLayout()
+        layout.setAlignment(Qt.AlignCenter)
+        self.setLayout(layout)
+
+        # Create the labels and the buttons.
+        title = QLabel(text=title)
+        description = QLabel(text=description)
+        description.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
+        start_btn = QPushButton(text="Start")
+        start_btn.clicked.connect(self.clicked_start)
+        stop_btn = QPushButton(text="Stop")
+        stop_btn.clicked.connect(self.clicked_stop)
+        done_btn = QPushButton(text="Done")
+        done_btn.clicked.connect(self.clicked_done)
+
+        for widget in (title, description, start_btn, stop_btn, done_btn):
+            layout.addWidget(widget)
+
+    @pyqtSlot(bool, name="clicked_start")
+    @log_exceptions
+    def clicked_start(self, b):
+        self.start.emit(self._task_uid)
+
+    @pyqtSlot(bool, name="clicked_stop")
+    @log_exceptions
+    def clicked_stop(self, b):
+        self.stop.emit(self._task_uid)
+
+    @pyqtSlot(bool, name="clicked_done")
+    @log_exceptions
+    def clicked_done(self, b):
+        self.done.emit(self._task_uid)
+
+
+class TrackingControlsWidget(QWidget):
+    """
+    The TrackingControlsWidget provides buttons to create tasks, start general work, pause, and end work.
+    """
+
+    create_task = pyqtSignal(name="create_task")
+    general_work = pyqtSignal(name="general_work")
+    pause = pyqtSignal(name="pause")
+    end_of_work = pyqtSignal(name="end_of_work")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        layout = QHBoxLayout()
+        self.setLayout(layout)
+
+        create_task_btn = QPushButton(text="Create task")
+        create_task_btn.clicked.connect(self.clicked_create_task)
+        general_work_btn = QPushButton(text="General work")
+        general_work_btn.clicked.connect(self.clicked_general_work)
+        pause_btn = QPushButton(text="Pause")
+        pause_btn.clicked.connect(self.clicked_pause)
+        end_of_work_btn = QPushButton(text="End of work")
+        end_of_work_btn.clicked.connect(self.clicked_end_of_work)
+
+        layout.addWidget(create_task_btn)
+        layout.addStretch()
+        for widget in (general_work_btn, pause_btn, end_of_work_btn):
+            layout.addWidget(widget)
+
+    @pyqtSlot(bool, name="clicked_create_task")
+    @log_exceptions
+    def clicked_create_task(self, b):
+        self.create_task.emit()
+
+    @pyqtSlot(bool, name="clicked_general_work")
+    @log_exceptions
+    def clicked_general_work(self, b):
+        self.general_work.emit()
+
+    @pyqtSlot(bool, name="clicked_pause")
+    @log_exceptions
+    def clicked_pause(self, b):
+        self.pause.emit()
+
+    @pyqtSlot(bool, name="clicked_end_of_work")
+    @log_exceptions
+    def clicked_end_of_work(self, b):
+        self.end_of_work.emit()
