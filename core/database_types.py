@@ -247,7 +247,7 @@ class TrackEntry(DatabaseObject):
         ("uid", "INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT"),
         ("task_uid", "INTEGER NOT NULL"),
         ("timestamp_begin", "TEXT NOT NULL"),
-        ("timestamp_end", "TEXT NOT NULL"),
+        ("timestamp_end", "TEXT"),
         ("description", "TEXT"),
         ("type_id", "INTEGER NOT NULL"),
         ("deleted", "BOOLEAN NOT NULL")
