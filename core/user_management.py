@@ -32,4 +32,13 @@ class UserManagement(object):
         Delete the task with the given uid.
         :param task_uid: The task uid.
         """
-        self._database.delete_task(task_uid)
+        task = Task(uid=task_uid, deleted=True)
+        self._database.update_task(task)
+
+    def task_done(self, task_uid):
+        """
+        Set the task with the given uid to done.
+        :param task_uid: The task uid.
+        """
+        task = Task(uid=task_uid, done=True)
+        self._database.update_task(task)

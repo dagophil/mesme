@@ -82,4 +82,6 @@ class TaskList(QGroupBox):
     @pyqtSlot(int, name="_on_task_done")
     @log_exceptions
     def _on_task_done(self, task_uid):
-        logging.debug("Setting task " + str(task_uid) + " to done")
+        task = self._tasks.pop(task_uid)
+        task.deleteLater()
+        self._user_management.task_done(task_uid)

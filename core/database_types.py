@@ -70,19 +70,6 @@ def update_object(connection, table_name, database_object, ignore_none=False):
         connection.commit()
 
 
-def delete_object(connection, table_name, object_uid):
-    """
-    Set the deleted attribute of the object with the given uid to True.
-    :param connection: The database connection.
-    :param table_name: The table name.
-    :param object_uid: The uid of the database object.
-    """
-    query = "UPDATE `%s` SET `deleted`=? WHERE `uid`=?;" % table_name
-    c = connection.cursor()
-    c.execute(query, (True, object_uid))
-    connection.commit()
-
-
 class DatabaseObject(object):
     """
     Base class for all database objects.

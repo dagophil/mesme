@@ -5,7 +5,7 @@ import os
 import sqlite3
 
 from .database_types import User, Setting, Task, TrackEntry
-from .database_types import create_table, insert_object, update_object, delete_object
+from .database_types import create_table, insert_object, update_object
 
 
 class DatabaseConnector(object):
@@ -187,14 +187,6 @@ class DatabaseConnector(object):
         """
         assert isinstance(task, Task)
         update_object(self._connection, "Tasks", task, ignore_none=True)
-
-    def delete_task(self, task_uid):
-        """
-        Set the deleted attribute of the task to True.
-        :param task_uid: The task uid.
-        """
-        assert isinstance(task_uid, int)
-        delete_object(self._connection, "Tasks", task_uid)
 
     def create_track_entry(self, entry):
         """

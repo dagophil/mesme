@@ -192,8 +192,9 @@ class TestDatabase(unittest.TestCase):
         tasks = [Task(user_uid=user.uid, type_id=0) for _ in range(5)]
         for t in tasks:
             db.create_task(t)
-        db.delete_task(tasks[1].uid)
-        del tasks[1]
+        task = tasks.pop(1)
+        task.deleted = True
+        db.update_task(task)
         open_tasks = db.get_open_tasks(user.uid)
         all_tasks = db.get_all_tasks(user.uid)
         self.assertEqual(open_tasks, tasks)
