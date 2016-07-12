@@ -32,7 +32,7 @@ class TaskList(QGroupBox):
         """
         Load the open user tasks.
         """
-        for task in self._user_management.open_tasks:
+        for task in self._user_management.get_open_tasks():
             self.add_task(task.uid, task.title, task.description)
 
     @pyqtSlot(int, str, str)
@@ -76,11 +76,13 @@ class TaskList(QGroupBox):
         for uid, task in self._tasks.items():
             if uid != task_uid and task.started:
                 task.stop_task()
+        assert self._current_track_entry_uid is None
         self._current_track_entry_uid = self._user_management.start_track_entry(task_uid)
 
     @pyqtSlot(int, name="_on_stop_task")
     @log_exceptions
     def _on_stop_task(self, task_uid):
+        assert self._current_track_entry_uid is not None
         self._user_management.stop_track_entry(self._current_track_entry_uid)
         self._current_track_entry_uid = None
 
