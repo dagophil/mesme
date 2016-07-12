@@ -22,6 +22,7 @@ class TaskList(QGroupBox):
 
         self._user_management = user_management
         self._tasks = {}  # map with the tasks {task_uid: TaskWidget}
+        self._current_track_entry_uid = None
 
         self.layout = QVBoxLayout()
         self.layout.setSpacing(0)
@@ -75,11 +76,14 @@ class TaskList(QGroupBox):
         for uid, task in self._tasks.items():
             if uid != task_uid and task.started:
                 task.stop_task()
+        self._current_track_entry_uid = self._user_management.start_track_entry(task_uid)
         logging.debug("Start work on task " + str(task_uid))
 
     @pyqtSlot(int, name="_on_stop_task")
     @log_exceptions
     def _on_stop_task(self, task_uid):
+        self._user_management.stop_track_entry(self._current_track_entry_uid)
+        self._current_track_entry_uid = None
         logging.debug("Stop work on task " + str(task_uid))
 
     @pyqtSlot(int, name="_on_task_done")

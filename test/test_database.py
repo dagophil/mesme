@@ -207,8 +207,8 @@ class TestDatabase(unittest.TestCase):
         task = Task(user_uid=1, type_id=0)
         db.create_task(task)
         now = db.get_current_timestamp()
-        entry0 = TrackEntry(task_uid=task.uid, timestamp_begin=now, timestamp_end=now, type_id=0)
-        entry1 = TrackEntry(task_uid=task.uid, timestamp_begin=now, timestamp_end=now, type_id=0)
+        entry0 = TrackEntry(task_uid=task.uid, timestamp_begin=now, timestamp_end=now)
+        entry1 = TrackEntry(task_uid=task.uid, timestamp_begin=now, timestamp_end=now)
         for entry in (entry0, entry1):
             db.create_track_entry(entry)
         for entry in (entry0, entry1):
@@ -224,8 +224,8 @@ class TestDatabase(unittest.TestCase):
         db.create_task(task0)
         db.create_task(task1)
         now = db.get_current_timestamp()
-        entries0 = [TrackEntry(task_uid=task0.uid, timestamp_begin=now, timestamp_end=now, type_id=0) for _ in range(3)]
-        entries1 = [TrackEntry(task_uid=task1.uid, timestamp_begin=now, timestamp_end=now, type_id=0) for _ in range(5)]
+        entries0 = [TrackEntry(task_uid=task0.uid, timestamp_begin=now, timestamp_end=now) for _ in range(3)]
+        entries1 = [TrackEntry(task_uid=task1.uid, timestamp_begin=now, timestamp_end=now) for _ in range(5)]
         for entry in entries0 + entries1:
             db.create_track_entry(entry)
         entries2 = db.get_track_entries_for_task(task0.uid)
@@ -234,6 +234,31 @@ class TestDatabase(unittest.TestCase):
         self.assertNotEqual(entries0, entries3)
         self.assertNotEqual(entries1, entries2)
         self.assertEqual(entries1, entries3)
+
+    def test_update_track_entry(self):
+        """
+        Create and update a track entry and make sure that the uid remains the same and that only the updated values are
+        found.
+        """
+        # Create a track entry.
+        user = User(name="Heinz")
+        db.create_user(user)
+        task = Task(user_uid=user.uid, type_id=0)
+        db.create_task(task)
+        entry0 = TrackEntry(task_uid=task.uid, timestamp_begin=db.get_current_timestamp())
+        db.create_track_entry(entry0)
+        uid = entry0.uid
+
+        # Perform an update.
+        entry0.timestamp_begin = "some text"
+        db.update_track_entry(entry0)
+
+        # Check that the updated track entry has the same uid and that the old track entry is not found anymore.
+        entries = db.get_track_entries_for_task(task.uid)
+        self.assertEqual(len(entries), 1)
+        entry = entries[0]
+        self.assertEqual(entry.uid, uid)
+        self.assertEqual(entry.timestamp_begin, "some text")
 
 
 if __name__ == "__main__":

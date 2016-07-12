@@ -209,6 +209,15 @@ class DatabaseConnector(object):
         entries = [TrackEntry(*row) for row in rows]
         return entries
 
+    def update_track_entry(self, entry):
+        """
+        Update all not-None values from the given track entry and use them to overwrite the respective fields of the
+        track entry with the given uid.
+        :param entry: The track entry with the update values.
+        """
+        assert isinstance(entry, TrackEntry)
+        update_object(self._connection, "TrackEntries", entry, ignore_none=True)
+
     def get_current_timestamp(self):
         """
         Returns a well-formatted current timestamp.

@@ -248,21 +248,16 @@ class TrackEntry(DatabaseObject):
         ("task_uid", "INTEGER NOT NULL"),
         ("timestamp_begin", "TEXT NOT NULL"),
         ("timestamp_end", "TEXT"),
-        ("description", "TEXT"),
-        ("type_id", "INTEGER NOT NULL"),
         ("deleted", "BOOLEAN NOT NULL")
     ])
 
-    def __init__(self, uid=None, task_uid=None, timestamp_begin=None, timestamp_end=None, description=None,
-                 type_id=None, deleted=False):
+    def __init__(self, uid=None, task_uid=None, timestamp_begin=None, timestamp_end=None, deleted=False):
         """
         Initialize the track entry object.
         :param uid: The uid.
         :param task_uid: The task uid.
         :param timestamp_begin: Timestamp of the beginning of the time tracking.
         :param timestamp_end: Timestamp of the end of the time tracking.
-        :param description: The description.
-        :param type_id: The type id.
         :param deleted: Whether the track entry is deleted.
         """
         super().__init__()
@@ -270,6 +265,4 @@ class TrackEntry(DatabaseObject):
         self.task_uid = task_uid
         self.timestamp_begin = timestamp_begin
         self.timestamp_end = timestamp_end
-        self.description = description
-        self.type_id = type_id
         self.deleted = bool(deleted)
