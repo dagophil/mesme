@@ -72,6 +72,9 @@ class TaskList(QGroupBox):
     @pyqtSlot(int, name="_on_start_task")
     @log_exceptions
     def _on_start_task(self, task_uid):
+        for uid, task in self._tasks.items():
+            if uid != task_uid and task.started:
+                task.stop_task()
         logging.debug("Start work on task " + str(task_uid))
 
     @pyqtSlot(int, name="_on_stop_task")

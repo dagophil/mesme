@@ -18,8 +18,9 @@ class TaskWidget(QWidget):
     def __init__(self, task_uid, title, description, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self._task_uid = task_uid
         self.title = title
+        self._task_uid = task_uid
+        self._started = False
 
         # Create the layout.
         layout = QHBoxLayout()
@@ -35,30 +36,40 @@ class TaskWidget(QWidget):
         title_lbl = QLabel(text=title)
         description_lbl = QLabel(text=description)
         description_lbl.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
-        start_btn = QPushButton(text="Start")
-        start_btn.clicked.connect(self._clicked_start)
-        stop_btn = QPushButton(text="Stop")
-        stop_btn.clicked.connect(self._clicked_stop)
+        self.toggle_btn = QPushButton(text="Start")
+        self.toggle_btn.clicked.connect(self._clicked_toggle)
         done_btn = QPushButton(text="Done")
         done_btn.clicked.connect(self._clicked_done)
 
-        for widget in (delete_btn, title_lbl, description_lbl, start_btn, stop_btn, done_btn):
+        for widget in (delete_btn, title_lbl, description_lbl, self.toggle_btn, done_btn):
             layout.addWidget(widget)
+
+    @property
+    def started(self):
+        return self._started
+
+    def start_task(self):
+        self._started = True
+        self.toggle_btn.setText("Stop")
+        self.start.emit(self._task_uid)
+
+    def stop_task(self):
+        self._started = False
+        self.toggle_btn.setText("Start")
+        self.stop.emit(self._task_uid)
 
     @pyqtSlot(bool, name="_clicked_delete")
     @log_exceptions
     def _clicked_delete(self, b):
         self.delete.emit(self._task_uid)
 
-    @pyqtSlot(bool, name="_clicked_start")
+    @pyqtSlot(bool, name="_clicked_toggle")
     @log_exceptions
-    def _clicked_start(self, b):
-        self.start.emit(self._task_uid)
-
-    @pyqtSlot(bool, name="_clicked_stop")
-    @log_exceptions
-    def _clicked_stop(self, b):
-        self.stop.emit(self._task_uid)
+    def _clicked_toggle(self, b):
+        if self._started:
+            self.stop_task()
+        else:
+            self.start_task()
 
     @pyqtSlot(bool, name="_clicked_done")
     @log_exceptions
