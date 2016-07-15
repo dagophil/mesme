@@ -14,6 +14,11 @@ class UserManagement(object):
         self._user = User(name=user_name)
         self._database = DatabaseConnector(database_location)
         self._database.create_user(self._user)
+        self._current_task_uid = None
+
+    @property
+    def current_task_uid(self):
+        return self._current_task_uid
 
     def get_open_tasks(self):
         return self._database.get_open_tasks(self._user.uid)
@@ -27,17 +32,22 @@ class UserManagement(object):
         task = Task(uid=task_uid, deleted=True)
         self._database.update_task(task)
 
-    def task_done(self, task_uid):
-        task = Task(uid=task_uid, done=True)
-        self._database.update_task(task)
-
-    def start_track_entry(self, task_uid):
+    def start_task(self, task_uid):
+        self._current_task_uid = task_uid
         now = self._database.get_current_timestamp()
         entry = TrackEntry(task_uid=task_uid, timestamp_begin=now)
         self._database.create_track_entry(entry)
         return entry.uid
 
-    def stop_track_entry(self, track_entry_uid):
-        now = self._database.get_current_timestamp()
-        entry = TrackEntry(uid=track_entry_uid, timestamp_end=now)
-        self._database.update_track_entry(entry)
+    def stop_current_task(self):
+        if self._current_task_uid is not None:
+            now = self._database.get_current_timestamp()
+            entries = self._database.get_open_track_entries(self._current_task_uid)
+            for entry in entries:
+                entry.timestamp_end = now
+                self._database.update_track_entry(entry)
+            self._current_task_uid = None
+
+    def task_done(self, task_uid):
+        task = Task(uid=task_uid, done=True)
+        self._database.update_task(task)

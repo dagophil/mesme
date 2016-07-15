@@ -11,7 +11,7 @@ class CreateTaskDialog(OkCancelDialog):
     Dialog with input fields to create a new task.
     """
 
-    accepted = pyqtSignal(tuple, name="accepted")
+    accepted = pyqtSignal(str, str, name="accepted")
 
     def __init__(self, *args, **kwargs):
         # Add the layout.
@@ -33,5 +33,5 @@ class CreateTaskDialog(OkCancelDialog):
         if len(title) == 0:
             self.show_error("Title must not be empty.")
         else:
-            self.accepted.emit((title, description))
+            self.accepted.emit(title, description)
             self.close()

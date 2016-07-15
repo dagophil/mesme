@@ -51,12 +51,10 @@ class TaskWidget(QWidget):
     def start_task(self):
         self._started = True
         self.toggle_btn.setText("Stop")
-        self.start.emit(self._task_uid)
 
     def stop_task(self):
         self._started = False
         self.toggle_btn.setText("Start")
-        self.stop.emit(self._task_uid)
 
     @pyqtSlot(bool, name="_clicked_delete")
     @log_exceptions
@@ -67,9 +65,9 @@ class TaskWidget(QWidget):
     @log_exceptions
     def _clicked_toggle(self, b):
         if self._started:
-            self.stop_task()
+            self.stop.emit(self._task_uid)
         else:
-            self.start_task()
+            self.start.emit(self._task_uid)
 
     @pyqtSlot(bool, name="_clicked_done")
     @log_exceptions

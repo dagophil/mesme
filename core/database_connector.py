@@ -196,7 +196,7 @@ class DatabaseConnector(object):
         assert isinstance(entry, TrackEntry)
         insert_object(self._connection, "TrackEntries", entry)
 
-    def get_track_entries_for_task(self, task_uid):
+    def get_track_entries(self, task_uid):
         """
         Returns all track entries for the given task sorted by timestamp in ascending order.
         :param task_uid: The task uid.
@@ -205,6 +205,20 @@ class DatabaseConnector(object):
         assert isinstance(task_uid, int)
         c = self._connection.cursor()
         c.execute("SELECT * FROM `TrackEntries` WHERE `task_uid`=? ORDER BY `timestamp_begin` ASC;", (task_uid,))
+        rows = c.fetchall()
+        entries = [TrackEntry(*row) for row in rows]
+        return entries
+
+    def get_open_track_entries(self, task_uid):
+        """
+        Returns all open track entries for the given task sorted by timestamp in ascending order.
+        :param task_uid: The task uid.
+        :return: List with the open track entries.
+        """
+        assert isinstance(task_uid, int)
+        c = self._connection.cursor()
+        c.execute("SELECT * FROM `TrackEntries` WHERE `task_uid`=? AND `timestamp_end` IS NULL "
+                  "ORDER BY `timestamp_begin` ASC;", (task_uid,))
         rows = c.fetchall()
         entries = [TrackEntry(*row) for row in rows]
         return entries
