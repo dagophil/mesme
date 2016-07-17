@@ -6,6 +6,7 @@ from .database_types import User, Task, TrackEntry
 
 TASK_WORK = 0
 GENERAL_WORK = 1
+PAUSE = 2
 
 
 class UserManagement(object):
@@ -21,10 +22,22 @@ class UserManagement(object):
         return self._current_task_uid
 
     def get_open_tasks(self):
-        return self._database.get_open_tasks(self._user.uid)
+        tasks = self._database.get_open_tasks(self._user.uid)
+        tasks = [task for task in tasks if task.type_id == TASK_WORK]
+        return tasks
 
     def create_task(self, title, description):
         task = Task(user_uid=self._user.uid, title=title, description=description, type_id=TASK_WORK)
+        self._database.create_task(task)
+        return task.uid
+
+    def create_general_work_task(self):
+        task = Task(user_uid=self._user.uid, type_id=GENERAL_WORK)
+        self._database.create_task(task)
+        return task.uid
+
+    def create_pause_task(self):
+        task = Task(user_uid=self._user.uid, type_id=PAUSE)
         self._database.create_task(task)
         return task.uid
 

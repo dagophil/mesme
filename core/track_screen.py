@@ -64,6 +64,7 @@ class TrackScreen(QWidget):
         self._user_management.start_task(task_uid)
         self._task_list.start_task(task_uid)
         self._tracking_controls.enable_pause_button()
+        self._tracking_controls.enable_general_work_button()
 
     @pyqtSlot(int, name="_on_stop_task")
     @log_exceptions
@@ -72,6 +73,7 @@ class TrackScreen(QWidget):
         self._user_management.stop_current_task()
         self._task_list.stop_task(task_uid)
         self._tracking_controls.disable_pause_button()
+        self._tracking_controls.enable_general_work_button()
 
     @pyqtSlot(int, name="_on_task_done")
     @log_exceptions
@@ -87,7 +89,9 @@ class TrackScreen(QWidget):
         """
         Start general work.
         """
-        logging.debug("Starting general work")
+        task_uid = self._user_management.create_general_work_task()
+        self._on_start_task(task_uid)
+        self._tracking_controls.disable_general_work_button()
 
     @pyqtSlot(name="_on_pause")
     @log_exceptions
@@ -95,7 +99,9 @@ class TrackScreen(QWidget):
         """
         Start pause.
         """
-        logging.debug("Pause")
+        task_uid = self._user_management.create_pause_task()
+        self._on_start_task(task_uid)
+        self._tracking_controls.disable_pause_button()
 
     @pyqtSlot(name="_on_end_of_work")
     @log_exceptions
@@ -103,4 +109,5 @@ class TrackScreen(QWidget):
         """
         Stop the work for today.
         """
-        logging.debug("End of work")
+        if self._user_management.current_task_uid is not None:
+            self._on_stop_task(self._user_management.current_task_uid)
