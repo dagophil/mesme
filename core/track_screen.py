@@ -44,6 +44,9 @@ class TrackScreen(QWidget):
         layout.addWidget(self._tracking_controls)
         layout.addWidget(self._task_list)
 
+    def __del__(self):
+        self._on_end_of_work()
+
     @pyqtSlot(str, str, name="_on_create_task")
     @log_exceptions
     def _on_create_task(self, title, description):
